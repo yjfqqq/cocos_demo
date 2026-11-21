@@ -2,7 +2,7 @@
   "ver": "1.0.27",
   "importer": "image",
   "imported": true,
-  "uuid": "c69094fc-fecb-4310-9748-1d8c443bac4a",
+  "uuid": "b5b84fb0-53bd-4516-b2f8-40b35e001cf0",
   "files": [
     ".json",
     ".png"
@@ -10,19 +10,19 @@
   "subMetas": {
     "6c48a": {
       "importer": "texture",
-      "uuid": "c69094fc-fecb-4310-9748-1d8c443bac4a@6c48a",
-      "displayName": "menu_button_background_300x80",
+      "uuid": "b5b84fb0-53bd-4516-b2f8-40b35e001cf0@6c48a",
+      "displayName": "chapter_02_deadwood_forest",
       "id": "6c48a",
       "name": "texture",
       "userData": {
-        "wrapModeS": "clamp-to-edge",
-        "wrapModeT": "clamp-to-edge",
-        "minfilter": "linear",
-        "magfilter": "linear",
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "nearest",
+        "magfilter": "nearest",
         "mipfilter": "none",
         "anisotropy": 0,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "c69094fc-fecb-4310-9748-1d8c443bac4a",
+        "imageUuidOrDatabaseUri": "b5b84fb0-53bd-4516-b2f8-40b35e001cf0",
         "visible": false
       },
       "ver": "1.0.22",
@@ -34,21 +34,21 @@
     },
     "f9941": {
       "importer": "sprite-frame",
-      "uuid": "c69094fc-fecb-4310-9748-1d8c443bac4a@f9941",
-      "displayName": "menu_button_background_300x80",
+      "uuid": "b5b84fb0-53bd-4516-b2f8-40b35e001cf0@f9941",
+      "displayName": "chapter_02_deadwood_forest",
       "id": "f9941",
       "name": "spriteFrame",
       "userData": {
         "trimThreshold": 1,
         "rotated": false,
-        "offsetX": -0.5,
+        "offsetX": 0,
         "offsetY": 0,
-        "trimX": 3,
-        "trimY": 2,
-        "width": 1493,
-        "height": 396,
-        "rawWidth": 1500,
-        "rawHeight": 400,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 1672,
+        "height": 941,
+        "rawWidth": 1672,
+        "rawHeight": 941,
         "borderTop": 0,
         "borderBottom": 0,
         "borderLeft": 0,
@@ -60,17 +60,17 @@
         "meshType": 0,
         "vertices": {
           "rawPosition": [
-            -746.5,
-            -198,
+            -836,
+            -470.5,
             0,
-            746.5,
-            -198,
+            836,
+            -470.5,
             0,
-            -746.5,
-            198,
+            -836,
+            470.5,
             0,
-            746.5,
-            198,
+            836,
+            470.5,
             0
           ],
           "indexes": [
@@ -82,40 +82,40 @@
             3
           ],
           "uv": [
-            3,
-            398,
-            1496,
-            398,
-            3,
-            2,
-            1496,
-            2
+            0,
+            941,
+            1672,
+            941,
+            0,
+            0,
+            1672,
+            0
           ],
           "nuv": [
-            0.002,
-            0.005,
-            0.9973333333333333,
-            0.005,
-            0.002,
-            0.995,
-            0.9973333333333333,
-            0.995
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
           ],
           "minPos": [
-            -746.5,
-            -198,
+            -836,
+            -470.5,
             0
           ],
           "maxPos": [
-            746.5,
-            198,
+            836,
+            470.5,
             0
           ]
         },
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "c69094fc-fecb-4310-9748-1d8c443bac4a@6c48a",
+        "imageUuidOrDatabaseUri": "b5b84fb0-53bd-4516-b2f8-40b35e001cf0@6c48a",
         "atlasUuid": "",
-        "trimType": "auto"
+        "trimType": "none"
       },
       "ver": "1.0.12",
       "imported": true,
@@ -128,7 +128,7 @@
   "userData": {
     "type": "sprite-frame",
     "fixAlphaTransparencyArtifacts": false,
-    "hasAlpha": true,
-    "redirect": "c69094fc-fecb-4310-9748-1d8c443bac4a@6c48a"
+    "hasAlpha": false,
+    "redirect": "b5b84fb0-53bd-4516-b2f8-40b35e001cf0@6c48a"
   }
 }

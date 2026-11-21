@@ -1,0 +1,27 @@
+Fusion Pixel Font / Fusion Bold Pixel Font
+Release: 2026.11.10
+Language: zh-Hans (Simplified Chinese)
+Design: 12px, proportional, TrueType outline format; local bundled files only.
+
+Regular font:
+https://github.com/TakWolf/fusion-pixel-font
+Archive: fusion-pixel-font-12px-proportional-ttf-v2026.11.10.zip
+Archive SHA256: aa6b4da3f80d95af45f41d74b37db0fa3a832d7f428adeb7234b4758d50bbae9
+File SHA256: 7e93fedda2c55bb37badb2262aaf43b08e3cb5976a0e3de2d90986ce59fe902e
+
+Bold pixel font, linked by the upstream Fusion Pixel project:
+https://github.com/pixel-font-studio/fusion-bold-pixel-font
+Archive: fusion-bold-pixel-font-12px-proportional-ttf-v2026.11.10.zip
+Archive SHA256: a4aef073b1328c27f5ad11dc9e4825ab90f4183d4294764df9943e8ffac3f4fd
+File SHA256: 3d180ad6c7a93b45ad3630e4b2561e69174bee73afcf496649c895539b5fd73f
+This is the upstream's algorithmically bold pixel edition, supplied as-is.
+No synthetic Label Bold is applied.
+
+Original binaries and all original font-license texts are preserved.
+Licenses: fusion-pixel-OFL.txt, fusion-bold-pixel-OFL.txt, and the three
+fusion-pixel-upstream-* license files distributed with both archives.
+
+MainMenu: 24px (2x) bold for menu and Start Challenge; 36px (3x) regular
+for waves; 24px (2x) regular for difficulty heading and difficulty names.
+No node scaling, text shadow, blur, glow, or synthetic bold is used.
+All Labels disable system-font rendering and reference local cc.Font assets.
