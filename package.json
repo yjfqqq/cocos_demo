@@ -3,5 +3,16 @@
   "uuid": "d49c9ee6-1cd8-4e9f-8687-412c343a71ac",
   "creator": {
     "version": "3.8.8"
+  },
+  "scripts": {
+    "test": "node tests/roulette.test.cjs && node tests/demo.test.cjs",
+    "test:roulette": "node tests/roulette.test.cjs",
+    "typecheck": "node tools/typecheck.cjs",
+    "test:browser": "node tests/browser-demo.cjs",
+    "prepare:demo": "node tools/prepare-demo.cjs",
+    "serve:demo": "node tools/serve-demo.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
   }
 }

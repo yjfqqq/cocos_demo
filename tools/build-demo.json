@@ -1,0 +1,14 @@
+{
+  "name": "FateMachineDemo",
+  "platform": "web-mobile",
+  "buildPath": "project://build",
+  "outputName": "demo-web",
+  "debug": true,
+  "sourceMaps": true,
+  "startScene": "59130eab-f543-4a02-a946-d516662c3084",
+  "scenes": [
+    { "url": "db://assets/scenes/MainMenu.scene", "uuid": "59130eab-f543-4a02-a946-d516662c3084" },
+    { "url": "db://assets/scenes/Battle.scene", "uuid": "2c2871f4-0f7e-4ea3-93a1-d12823d4b81b" }
+  ],
+  "packages": { "web-mobile": { "orientation": "landscape", "embedWebDebugger": false } }
+}
