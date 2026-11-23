@@ -51,7 +51,7 @@ export class RouletteUI {
 
         // The decorative outer ring is a sibling of WheelRotor and therefore stays fixed.
         if (wheelRimArt) {
-            ui.image(frame, wheelRimArt, 'WheelRim', 0, 0, 440, 440);
+            ui.image(frame, wheelRimArt, 'WheelRim', 0, 0, 448, 448);
         } else {
             this.drawFallbackRim(frame);
         }
@@ -329,6 +329,55 @@ export class RouletteUI {
         graphics.close();
     }
 
+    /**
+     * A restrained winner treatment that preserves the original pixel-art wheel.
+     * The sector interior is only lightly tinted; the gold edge does the work.
+     * Sector 0 is centred at 12 o'clock, matching RouletteSpin.ts.
+     */
+    private drawWinningHighlight(index: number): void {
+        const graphics = this.highlight;
+        graphics.clear();
+        if (index < 0) return;
+
+        const centre = 90 - index * SECTOR_DEGREES;
+        const start = (centre + SECTOR_DEGREES / 2) * Math.PI / 180;
+        const end = (centre - SECTOR_DEGREES / 2) * Math.PI / 180;
+        const outer = BATTLE_LAYOUT.wheelRadius - 12;
+        const inner = 78;
+        const steps = 28;
+
+        // Subtle ring-shaped sector tint. Keep the centre emblem untouched.
+        graphics.moveTo(Math.cos(start) * inner, Math.sin(start) * inner);
+        graphics.lineTo(Math.cos(start) * outer, Math.sin(start) * outer);
+        for (let step = 1; step <= steps; step++) {
+            const angle = start + (end - start) * step / steps;
+            graphics.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+        }
+        graphics.lineTo(Math.cos(end) * inner, Math.sin(end) * inner);
+        for (let step = 1; step <= steps; step++) {
+            const angle = end + (start - end) * step / steps;
+            graphics.lineTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
+        }
+        graphics.close();
+        graphics.fillColor = this.ui.color('#F6C65A20');
+        graphics.fill();
+
+        // Fine gold outline, not a thick opaque wedge.
+        graphics.strokeColor = this.ui.color('#FFE7A0');
+        graphics.lineWidth = 3;
+        graphics.stroke();
+
+        // A slightly brighter outer arc gives the winning slice a clear RPG reward cue.
+        graphics.moveTo(Math.cos(start) * outer, Math.sin(start) * outer);
+        for (let step = 1; step <= steps; step++) {
+            const angle = start + (end - start) * step / steps;
+            graphics.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+        }
+        graphics.strokeColor = this.ui.color('#FFD36A');
+        graphics.lineWidth = 5;
+        graphics.stroke();
+    }
+
     update(_dt: number): void {
         this.sync();
         const recruit = this.game.recruit;
@@ -339,15 +388,7 @@ export class RouletteUI {
         const index = revealComplete ? recruit.plan!.index : -1;
         if (index !== this.highlighted) {
             this.highlighted = index;
-            this.highlight.clear();
-            if (index >= 0) {
-                this.sector(this.highlight, index);
-                this.highlight.fillColor = this.ui.color('#F1C77A33');
-                this.highlight.fill();
-                this.highlight.strokeColor = this.ui.color('#FFF0A5');
-                this.highlight.lineWidth = 6;
-                this.highlight.stroke();
-            }
+            this.drawWinningHighlight(index);
         }
         const age = recruit.elapsed - RECRUIT_CONFIG.spinDuration;
         const kick = index >= 0 && age < 0.55 ? Math.sin(age / 0.55 * Math.PI) * 0.07 : 0;
