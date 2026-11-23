@@ -1,4 +1,4 @@
-import { Graphics, Label, Node } from 'cc';
+import { Graphics, Label, Node, SpriteFrame } from 'cc';
 import { BASES } from '../config/DemoConfig';
 import { BATTLE_LAYOUT, CLASS_PRESENTATION, RECRUIT_CONFIG } from '../config/RecruitConfig';
 import { GameManager } from '../core/GameManager';
@@ -21,6 +21,7 @@ export class RouletteUI {
         parent: Node,
         private ui: DarkUI,
         private game: GameManager,
+        wheelArt: SpriteFrame | null,
         private onRecruit: () => void,
         private onMessage: (message: string) => void,
     ) {
@@ -38,99 +39,13 @@ export class RouletteUI {
         this.drawTitle();
 
         const frame = ui.node(this.node, 'WheelFrame', 0, BATTLE_LAYOUT.wheelY, 500, 500);
-        const rim = frame.addComponent(Graphics);
-        rim.fillColor = ui.color('#100B24');
-        rim.circle(0, 0, 246);
-        rim.fill();
-        rim.lineWidth = 9;
-        rim.strokeColor = ui.color('#6D3A24');
-        rim.circle(0, 0, 246);
-        rim.stroke();
-        rim.lineWidth = 5;
-        rim.strokeColor = ui.color('#F2B94F');
-        rim.circle(0, 0, 238);
-        rim.stroke();
-        rim.lineWidth = 2;
-        rim.strokeColor = ui.color('#FFF0A6');
-        rim.circle(0, 0, 229);
-        rim.stroke();
-        for (let i = 0; i < 56; i++) {
-            const angle = i / 56 * Math.PI * 2;
-            const outer = i % 8 === 0 ? 216 : 222;
-            rim.moveTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
-            rim.lineTo(Math.cos(angle) * 230, Math.sin(angle) * 230);
-        }
-        rim.stroke();
-
         this.rotor = ui.node(frame, 'WheelRotor', 0, 0, 432, 432);
-        const sectors = this.rotor.addComponent(Graphics);
-        BASES.forEach((base, index) => {
-            this.sector(sectors, index);
-            sectors.fillColor = ui.color(CLASS_PRESENTATION[base.id].color);
-            sectors.fill();
-            sectors.strokeColor = ui.color('#E7B85C');
-            sectors.lineWidth = 3;
-            sectors.stroke();
-
-            const angle = (90 - index * SECTOR_DEGREES) * Math.PI / 180;
-            sectors.strokeColor = ui.color(CLASS_PRESENTATION[base.id].light + '66');
-            sectors.lineWidth = 3;
-            sectors.arc(0, 0, 198, angle - 0.34, angle + 0.34, false);
-            sectors.stroke();
-
-            for (const radius of [82, 91, 184]) {
-                sectors.fillColor = ui.color(CLASS_PRESENTATION[base.id].light);
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-                sectors.circle(x, y, radius === 184 ? 2.5 : 2);
-                sectors.fill();
-            }
-
-            // Icons only: class names are intentionally omitted from the seven sectors.
-            const iconRoot = ui.node(
-                this.rotor,
-                'Sector_' + base.id,
-                Math.cos(angle) * 145,
-                Math.sin(angle) * 145,
-                92,
-                92,
-            );
-            const icon = classIcon(iconRoot, ui, base.id, 70);
-            icon.setPosition(0, 0);
-        });
-
+        if (wheelArt) {
+            ui.image(this.rotor, wheelArt, 'WheelArtwork', 0, 0, 432, 432);
+        } else {
+            this.drawFallbackWheel(frame);
+        }
         this.highlight = ui.node(this.rotor, 'WinningSector').addComponent(Graphics);
-
-        const centre = ui.node(frame, 'ArcaneHub', 0, 0, 140, 140);
-        const hub = centre.addComponent(Graphics);
-        hub.fillColor = ui.color('#241039');
-        hub.circle(0, 0, 68);
-        hub.fill();
-        hub.lineWidth = 7;
-        hub.strokeColor = ui.color('#9D542C');
-        hub.circle(0, 0, 68);
-        hub.stroke();
-        hub.lineWidth = 3;
-        hub.strokeColor = ui.color('#F7D77E');
-        hub.circle(0, 0, 58);
-        hub.stroke();
-        hub.fillColor = ui.color('#7C39B7');
-        hub.strokeColor = ui.color('#FFE28B');
-        hub.lineWidth = 4;
-        hub.moveTo(0, 47);
-        hub.lineTo(34, 0);
-        hub.lineTo(0, -47);
-        hub.lineTo(-34, 0);
-        hub.close();
-        hub.fill();
-        hub.stroke();
-        hub.fillColor = ui.color('#F2D5FF');
-        hub.moveTo(0, 28);
-        hub.lineTo(16, 0);
-        hub.lineTo(0, -28);
-        hub.lineTo(-16, 0);
-        hub.close();
-        hub.fill();
 
         this.pointer = ui.node(frame, 'FixedPointer', 0, 239, 64, 70);
         const pointer = this.pointer.addComponent(Graphics);
@@ -165,6 +80,100 @@ export class RouletteUI {
             this.onRecruit();
         });
         this.sync();
+    }
+
+    private drawFallbackWheel(frame: Node): void {
+        const rim = frame.addComponent(Graphics);
+        rim.fillColor = this.ui.color('#100B24');
+        rim.circle(0, 0, 246);
+        rim.fill();
+        rim.lineWidth = 9;
+        rim.strokeColor = this.ui.color('#6D3A24');
+        rim.circle(0, 0, 246);
+        rim.stroke();
+        rim.lineWidth = 5;
+        rim.strokeColor = this.ui.color('#F2B94F');
+        rim.circle(0, 0, 238);
+        rim.stroke();
+        rim.lineWidth = 2;
+        rim.strokeColor = this.ui.color('#FFF0A6');
+        rim.circle(0, 0, 229);
+        rim.stroke();
+        for (let i = 0; i < 56; i++) {
+            const angle = i / 56 * Math.PI * 2;
+            const outer = i % 8 === 0 ? 216 : 222;
+            rim.moveTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+            rim.lineTo(Math.cos(angle) * 230, Math.sin(angle) * 230);
+        }
+        rim.stroke();
+
+        const sectors = this.rotor.addComponent(Graphics);
+        BASES.forEach((base, index) => {
+            this.sector(sectors, index);
+            sectors.fillColor = this.ui.color(CLASS_PRESENTATION[base.id].color);
+            sectors.fill();
+            sectors.strokeColor = this.ui.color('#E7B85C');
+            sectors.lineWidth = 3;
+            sectors.stroke();
+
+            const angle = (90 - index * SECTOR_DEGREES) * Math.PI / 180;
+            sectors.strokeColor = this.ui.color(CLASS_PRESENTATION[base.id].light + '66');
+            sectors.lineWidth = 3;
+            sectors.arc(0, 0, 198, angle - 0.34, angle + 0.34, false);
+            sectors.stroke();
+
+            for (const radius of [82, 91, 184]) {
+                sectors.fillColor = this.ui.color(CLASS_PRESENTATION[base.id].light);
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                sectors.circle(x, y, radius === 184 ? 2.5 : 2);
+                sectors.fill();
+            }
+
+            // Icons only: class names are intentionally omitted from the seven sectors.
+            const iconRoot = this.ui.node(
+                this.rotor,
+                'Sector_' + base.id,
+                Math.cos(angle) * 145,
+                Math.sin(angle) * 145,
+                92,
+                92,
+            );
+            const icon = classIcon(iconRoot, ui, base.id, 70);
+            icon.setPosition(0, 0);
+        });
+
+        const centre = this.ui.node(frame, 'ArcaneHub', 0, 0, 140, 140);
+        const hub = centre.addComponent(Graphics);
+        hub.fillColor = this.ui.color('#241039');
+        hub.circle(0, 0, 68);
+        hub.fill();
+        hub.lineWidth = 7;
+        hub.strokeColor = this.ui.color('#9D542C');
+        hub.circle(0, 0, 68);
+        hub.stroke();
+        hub.lineWidth = 3;
+        hub.strokeColor = this.ui.color('#F7D77E');
+        hub.circle(0, 0, 58);
+        hub.stroke();
+        hub.fillColor = this.ui.color('#7C39B7');
+        hub.strokeColor = this.ui.color('#FFE28B');
+        hub.lineWidth = 4;
+        hub.moveTo(0, 47);
+        hub.lineTo(34, 0);
+        hub.lineTo(0, -47);
+        hub.lineTo(-34, 0);
+        hub.close();
+        hub.fill();
+        hub.stroke();
+        hub.fillColor = this.ui.color('#F2D5FF');
+        hub.moveTo(0, 28);
+        hub.lineTo(16, 0);
+        hub.lineTo(0, -28);
+        hub.lineTo(-16, 0);
+        hub.close();
+        hub.fill();
+
     }
 
     private drawTitle(): void {
