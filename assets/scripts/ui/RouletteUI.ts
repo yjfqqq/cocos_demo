@@ -342,11 +342,13 @@ export class RouletteUI {
         const centre = 90 - index * SECTOR_DEGREES;
         const start = (centre + SECTOR_DEGREES / 2) * Math.PI / 180;
         const end = (centre - SECTOR_DEGREES / 2) * Math.PI / 180;
-        const outer = BATTLE_LAYOUT.wheelRadius - 12;
-        const inner = 78;
+        const outer = BATTLE_LAYOUT.wheelRadius - 13;
+        // Keep the effect outside the baked-in centre medallion.
+        const inner = 72;
         const steps = 28;
 
-        // Subtle ring-shaped sector tint. Keep the centre emblem untouched.
+        // A soft ring-sector tint. Fill only: do not stroke the inner arc,
+        // otherwise it creates an unwanted curved border around the centre jewel.
         graphics.moveTo(Math.cos(start) * inner, Math.sin(start) * inner);
         graphics.lineTo(Math.cos(start) * outer, Math.sin(start) * outer);
         for (let step = 1; step <= steps; step++) {
@@ -359,22 +361,26 @@ export class RouletteUI {
             graphics.lineTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
         }
         graphics.close();
-        graphics.fillColor = this.ui.color('#F6C65A20');
+        graphics.fillColor = this.ui.color('#F6C65A2A');
         graphics.fill();
 
-        // Fine gold outline, not a thick opaque wedge.
-        graphics.strokeColor = this.ui.color('#FFE7A0');
-        graphics.lineWidth = 3;
+        // Re-emphasize the two existing dividers, starting outside the centre jewel.
+        graphics.strokeColor = this.ui.color('#FFE6A0C0');
+        graphics.lineWidth = 2.5;
+        graphics.moveTo(Math.cos(start) * inner, Math.sin(start) * inner);
+        graphics.lineTo(Math.cos(start) * outer, Math.sin(start) * outer);
+        graphics.moveTo(Math.cos(end) * inner, Math.sin(end) * inner);
+        graphics.lineTo(Math.cos(end) * outer, Math.sin(end) * outer);
         graphics.stroke();
 
-        // A slightly brighter outer arc gives the winning slice a clear RPG reward cue.
+        // The outer arc is the only continuous bright outline.
+        graphics.strokeColor = this.ui.color('#FFD36A');
+        graphics.lineWidth = 4;
         graphics.moveTo(Math.cos(start) * outer, Math.sin(start) * outer);
         for (let step = 1; step <= steps; step++) {
             const angle = start + (end - start) * step / steps;
             graphics.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
         }
-        graphics.strokeColor = this.ui.color('#FFD36A');
-        graphics.lineWidth = 5;
         graphics.stroke();
     }
 
