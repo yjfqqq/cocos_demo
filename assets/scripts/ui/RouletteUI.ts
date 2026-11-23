@@ -6,91 +6,328 @@ import { GameState } from '../core/GameState';
 import { SECTOR_DEGREES } from '../recruit/RouletteSpin';
 import { DarkUI, PALETTE } from './DarkUI';
 import { classIcon } from './ClassIcon';
+
 export class RouletteUI {
     readonly node: Node;
     readonly rotor: Node;
     readonly pointer: Node;
     private highlight: Graphics;
-    private result: Label;
-    private detail: Label;
-    private highlighted = -2;
-    private clock = 0;
-    constructor(parent: Node, private ui: DarkUI, private game: GameManager) {
-        this.node = ui.panel(parent, 'FateWheelPanel', BATTLE_LAYOUT.wheelX, 0, 530, 790, '#13172C', '#88734F', 235);
-        ui.text(this.node, '命运转盘', 0, 345, 39, PALETTE.gold, 470, 60);
-        ui.text(this.node, '七道命运  /  等概率降临', 0, 295, 22, PALETTE.muted, 470, 45);
-        const frame = ui.node(this.node, 'WheelFrame', 0, BATTLE_LAYOUT.wheelY, 490, 490);
+    private recruitButton: Node;
+    private recruitButtonGraphics: Graphics;
+    private recruitButtonLabel: Label;
+    private lastButtonKey = '';
+
+    constructor(
+        parent: Node,
+        private ui: DarkUI,
+        private game: GameManager,
+        private onRecruit: () => void,
+        private onMessage: (message: string) => void,
+    ) {
+        this.node = ui.panel(
+            parent,
+            'FateWheelPanel',
+            BATTLE_LAYOUT.wheelX,
+            BATTLE_LAYOUT.panelY,
+            BATTLE_LAYOUT.wheelWidth,
+            BATTLE_LAYOUT.panelHeight,
+            '#1B102A',
+            '#C58A42',
+            248,
+        );
+        this.drawTitle();
+
+        const frame = ui.node(this.node, 'WheelFrame', 0, BATTLE_LAYOUT.wheelY, 500, 500);
         const rim = frame.addComponent(Graphics);
-        rim.fillColor = ui.color('#090E22'); rim.circle(0,0,244); rim.fill();
-        rim.lineWidth = 7; rim.strokeColor = ui.color('#8F704C'); rim.circle(0,0,237); rim.stroke();
-        rim.lineWidth = 2; rim.strokeColor = ui.color('#E5CEA0'); rim.circle(0,0,231); rim.stroke();
-        rim.circle(0,0,244); rim.stroke();
+        rim.fillColor = ui.color('#100B24');
+        rim.circle(0, 0, 246);
+        rim.fill();
+        rim.lineWidth = 9;
+        rim.strokeColor = ui.color('#6D3A24');
+        rim.circle(0, 0, 246);
+        rim.stroke();
+        rim.lineWidth = 5;
+        rim.strokeColor = ui.color('#F2B94F');
+        rim.circle(0, 0, 238);
+        rim.stroke();
+        rim.lineWidth = 2;
+        rim.strokeColor = ui.color('#FFF0A6');
+        rim.circle(0, 0, 229);
+        rim.stroke();
         for (let i = 0; i < 56; i++) {
-            const a = i / 56 * Math.PI * 2, r = i % 8 === 0 ? 220 : 225;
-            rim.moveTo(Math.cos(a)*r,Math.sin(a)*r); rim.lineTo(Math.cos(a)*230,Math.sin(a)*230);
+            const angle = i / 56 * Math.PI * 2;
+            const outer = i % 8 === 0 ? 216 : 222;
+            rim.moveTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+            rim.lineTo(Math.cos(angle) * 230, Math.sin(angle) * 230);
         }
         rim.stroke();
+
         this.rotor = ui.node(frame, 'WheelRotor', 0, 0, 432, 432);
         const sectors = this.rotor.addComponent(Graphics);
-        BASES.forEach((base, i) => {
-            this.sector(sectors, i); sectors.fillColor = ui.color(CLASS_PRESENTATION[base.id].color); sectors.fill();
-            sectors.strokeColor = ui.color('#B29A6A'); sectors.lineWidth = 2; sectors.stroke();
-            // Subtle inlaid arc, pips and engraved lines, rather than a flat colour disc.
-            const angle = (90-i*SECTOR_DEGREES)*Math.PI/180;
-            sectors.strokeColor = ui.color(`${CLASS_PRESENTATION[base.id].light}66`); sectors.lineWidth = 3;
-            sectors.arc(0,0,199,angle-.34,angle+.34,false); sectors.stroke();
-            for (const radius of [83, 91, 185]) {
-                sectors.fillColor = ui.color(`${CLASS_PRESENTATION[base.id].light}99`);
-                const x=Math.cos(angle)*radius,y=Math.sin(angle)*radius;
-                sectors.rect(x-2,y-2,4,4); sectors.fill();
+        BASES.forEach((base, index) => {
+            this.sector(sectors, index);
+            sectors.fillColor = ui.color(CLASS_PRESENTATION[base.id].color);
+            sectors.fill();
+            sectors.strokeColor = ui.color('#E7B85C');
+            sectors.lineWidth = 3;
+            sectors.stroke();
+
+            const angle = (90 - index * SECTOR_DEGREES) * Math.PI / 180;
+            sectors.strokeColor = ui.color(CLASS_PRESENTATION[base.id].light + '66');
+            sectors.lineWidth = 3;
+            sectors.arc(0, 0, 198, angle - 0.34, angle + 0.34, false);
+            sectors.stroke();
+
+            for (const radius of [82, 91, 184]) {
+                sectors.fillColor = ui.color(CLASS_PRESENTATION[base.id].light);
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                sectors.circle(x, y, radius === 184 ? 2.5 : 2,);
+                sectors.fill();
             }
-            const labelRoot = ui.node(this.rotor, `Sector_${base.id}`, Math.cos(angle)*145,Math.sin(angle)*145,125,105);
-            labelRoot.setRotationFromEuler(0,0,-i*SECTOR_DEGREES);
-            const icon = classIcon(labelRoot,ui,base.id,53); icon.setPosition(0,17);
-            ui.text(labelRoot,base.name,0,-29,24,CLASS_PRESENTATION[base.id].light,125,38);
+
+            // Icons only: class names are intentionally omitted from the seven sectors.
+            const iconRoot = ui.node(
+                this.rotor,
+                'Sector_' + base.id,
+                Math.cos(angle) * 145,
+                Math.sin(angle) * 145,
+                92,
+                92,
+            );
+            const icon = classIcon(iconRoot, ui, base.id, 70);
+            icon.setPosition(0, 0);
         });
-        this.highlight = ui.node(this.rotor,'WinningSector').addComponent(Graphics);
-        const centre = ui.node(frame,'ArcaneHub'), hub = centre.addComponent(Graphics);
-        hub.fillColor=ui.color('#0C142B');hub.circle(0,0,66);hub.fill();hub.strokeColor=ui.color(PALETTE.gold);hub.lineWidth=3;hub.stroke();
-        hub.circle(0,0,57);hub.stroke();
-        hub.fillColor=ui.color('#3E355C');hub.moveTo(0,47);hub.lineTo(36,0);hub.lineTo(0,-47);hub.lineTo(-36,0);hub.close();hub.fill();hub.stroke();
-        hub.fillColor=ui.color('#C7B4E6');hub.moveTo(0,26);hub.lineTo(13,0);hub.lineTo(0,-26);hub.lineTo(-13,0);hub.close();hub.fill();
-        ui.text(centre,'命',0,0,25,'#FAE7B7',45,45);
-        this.pointer=ui.node(frame,'FixedPointer',0,237,56,65);
-        const pointer=this.pointer.addComponent(Graphics);
-        pointer.fillColor=ui.color('#E5C88B');pointer.strokeColor=ui.color('#755638');pointer.lineWidth=3;
-        pointer.moveTo(-22,27);pointer.lineTo(22,27);pointer.lineTo(0,-20);pointer.close();pointer.fill();pointer.stroke();
-        pointer.fillColor=ui.color('#795268');pointer.moveTo(-9,19);pointer.lineTo(9,19);pointer.lineTo(0,-3);pointer.close();pointer.fill();
-        this.result=ui.text(this.node,'静候命运的召唤',0,-287,25,PALETTE.gold,485,54);
-        this.result.node.name='DrawResult';
-        this.detail=ui.text(this.node,'转动后直接抽取一位基础职业\n完成转职与布阵后可再次招募',0,-345,20,PALETTE.muted,470,65);
+
+        this.highlight = ui.node(this.rotor, 'WinningSector').addComponent(Graphics);
+
+        const centre = ui.node(frame, 'ArcaneHub', 0, 0, 140, 140);
+        const hub = centre.addComponent(Graphics);
+        hub.fillColor = ui.color('#241039');
+        hub.circle(0, 0, 68);
+        hub.fill();
+        hub.lineWidth = 7;
+        hub.strokeColor = ui.color('#9D542C');
+        hub.circle(0, 0, 68);
+        hub.stroke();
+        hub.lineWidth = 3;
+        hub.strokeColor = ui.color('#F7D77E');
+        hub.circle(0, 0, 58);
+        hub.stroke();
+        hub.fillColor = ui.color('#7C39B7');
+        hub.strokeColor = ui.color('#FFE28B');
+        hub.lineWidth = 4;
+        hub.moveTo(0, 47);
+        hub.lineTo(34, 0);
+        hub.lineTo(0, -47);
+        hub.lineTo(-34, 0);
+        hub.close();
+        hub.fill();
+        hub.stroke();
+        hub.fillColor = ui.color('#F2D5FF');
+        hub.moveTo(0, 28);
+        hub.lineTo(16, 0);
+        hub.lineTo(0, -28);
+        hub.lineTo(-16, 0);
+        hub.close();
+        hub.fill();
+
+        this.pointer = ui.node(frame, 'FixedPointer', 0, 239, 64, 70);
+        const pointer = this.pointer.addComponent(Graphics);
+        pointer.fillColor = ui.color('#7B2ED0');
+        pointer.strokeColor = ui.color('#FFE18A');
+        pointer.lineWidth = 5;
+        pointer.moveTo(0, 31);
+        pointer.lineTo(25, 0);
+        pointer.lineTo(0, -30);
+        pointer.lineTo(-25, 0);
+        pointer.close();
+        pointer.fill();
+        pointer.stroke();
+        pointer.fillColor = ui.color('#F4D8FF');
+        pointer.moveTo(0, 18);
+        pointer.lineTo(12, 0);
+        pointer.lineTo(0, -18);
+        pointer.lineTo(-12, 0);
+        pointer.close();
+        pointer.fill();
+
+        this.drawCost();
+        this.recruitButton = ui.node(this.node, 'Recruit', 0, -365, 390, 86);
+        this.recruitButtonGraphics = this.recruitButton.addComponent(Graphics);
+        this.recruitButtonLabel = ui.text(this.recruitButton, '转动命运', 0, 0, 35, '#421923', 350, 68);
+        this.recruitButton.on(Node.EventType.TOUCH_END, () => {
+            if (this.game.state !== GameState.Preparation) return;
+            if (this.game.economy.gold < this.game.price) {
+                this.onMessage('金币不足，无法转动命运');
+                return;
+            }
+            this.onRecruit();
+        });
+        this.sync();
     }
-    private sector(graphics: Graphics,index: number): void {
-        graphics.moveTo(0,0);
-        for(let step=0;step<=40;step++) {
-            const angle=(90+SECTOR_DEGREES/2-index*SECTOR_DEGREES-step/40*SECTOR_DEGREES)*Math.PI/180;
-            graphics.lineTo(Math.cos(angle)*BATTLE_LAYOUT.wheelRadius,Math.sin(angle)*BATTLE_LAYOUT.wheelRadius);
+
+    private drawTitle(): void {
+        const banner = this.ui.node(this.node, 'RouletteTitle', 0, 332, 450, 100);
+        const graphics = banner.addComponent(Graphics);
+        graphics.fillColor = this.ui.color('#32112F');
+        graphics.roundRect(-180, -35, 360, 70, 14);
+        graphics.fill();
+        graphics.lineWidth = 8;
+        graphics.strokeColor = this.ui.color('#7A3A25');
+        graphics.roundRect(-180, -35, 360, 70, 14);
+        graphics.stroke();
+        graphics.lineWidth = 4;
+        graphics.strokeColor = this.ui.color('#F8C65A');
+        graphics.roundRect(-172, -28, 344, 56, 11);
+        graphics.stroke();
+        graphics.lineWidth = 2;
+        graphics.strokeColor = this.ui.color('#FFF0B0');
+        graphics.moveTo(-150, 20);
+        graphics.lineTo(150, 20);
+        graphics.stroke();
+
+        const leaf = (side: number, offset: number) => {
+            graphics.fillColor = this.ui.color('#E3A93F');
+            graphics.strokeColor = this.ui.color('#6D351F');
+            graphics.lineWidth = 2;
+            graphics.moveTo(side * 170, offset);
+            graphics.lineTo(side * 207, offset + 15);
+            graphics.lineTo(side * 194, offset + 2);
+            graphics.lineTo(side * 211, offset - 10);
+            graphics.lineTo(side * 176, offset - 13);
+            graphics.close();
+            graphics.fill();
+            graphics.stroke();
+        };
+        leaf(-1, 13);
+        leaf(-1, -10);
+        leaf(1, 13);
+        leaf(1, -10);
+
+        graphics.fillColor = this.ui.color('#9B39D8');
+        graphics.strokeColor = this.ui.color('#FFE18A');
+        graphics.lineWidth = 3;
+        graphics.moveTo(0, 49);
+        graphics.lineTo(15, 31);
+        graphics.lineTo(0, 13);
+        graphics.lineTo(-15, 31);
+        graphics.close();
+        graphics.fill();
+        graphics.stroke();
+        this.ui.text(banner, '命运转盘', 0, -1, 43, '#FFE5A4', 320, 70);
+    }
+
+    private drawCost(): void {
+        const coin = this.ui.node(this.node, 'RecruitCoin', -58, -291, 40, 40);
+        const graphics = coin.addComponent(Graphics);
+        graphics.fillColor = this.ui.color('#EFAF24');
+        graphics.circle(0, 0, 17);
+        graphics.fill();
+        graphics.lineWidth = 3;
+        graphics.strokeColor = this.ui.color('#7C3E1D');
+        graphics.circle(0, 0, 17);
+        graphics.stroke();
+        graphics.lineWidth = 2;
+        graphics.strokeColor = this.ui.color('#FFF0A0');
+        graphics.circle(0, 0, 12);
+        graphics.stroke();
+        graphics.fillColor = this.ui.color('#FFE38B');
+        graphics.moveTo(0, 8);
+        graphics.lineTo(7, 0);
+        graphics.lineTo(0, -8);
+        graphics.lineTo(-7, 0);
+        graphics.close();
+        graphics.fill();
+        this.ui.text(this.node, '10 金币', 38, -291, 30, '#F8D77F', 150, 48);
+    }
+
+    private drawRecruitButton(enabled: boolean): void {
+        const graphics = this.recruitButtonGraphics;
+        const width = 390;
+        const height = 86;
+        graphics.clear();
+        graphics.fillColor = this.ui.color(enabled ? '#7E281D' : '#3C3446');
+        graphics.roundRect(-width / 2, -height / 2, width, height, 19);
+        graphics.fill();
+        graphics.lineWidth = 8;
+        graphics.strokeColor = this.ui.color(enabled ? '#8D481E' : '#625A6B');
+        graphics.stroke();
+        graphics.fillColor = this.ui.color(enabled ? '#F5B92B' : '#796E7C');
+        graphics.roundRect(-width / 2 + 9, -height / 2 + 9, width - 18, height - 18, 14);
+        graphics.fill();
+        graphics.lineWidth = 3;
+        graphics.strokeColor = this.ui.color(enabled ? '#FFF0A0' : '#B0A2AD');
+        graphics.roundRect(-width / 2 + 13, -height / 2 + 13, width - 26, height - 26, 11);
+        graphics.stroke();
+        graphics.strokeColor = this.ui.color(enabled ? '#FFF3B9' : '#A99EAA');
+        graphics.lineWidth = 2;
+        graphics.moveTo(-145, 23);
+        graphics.lineTo(145, 23);
+        graphics.stroke();
+        for (const side of [-1, 1]) {
+            graphics.fillColor = this.ui.color(enabled ? '#FFF0A0' : '#B0A2AD');
+            graphics.moveTo(side * 164, 0);
+            graphics.lineTo(side * 174, 9);
+            graphics.lineTo(side * 184, 0);
+            graphics.lineTo(side * 174, -9);
+            graphics.close();
+            graphics.fill();
+        }
+        this.recruitButtonLabel.color = this.ui.color(enabled ? '#421923' : '#D0C4C8');
+    }
+
+    private sync(): void {
+        const state = this.game.state;
+        const available = state === GameState.Preparation;
+        const enabled = available && this.game.economy.gold >= this.game.price;
+        this.recruitButton.name = available ? 'Recruit' : 'RecruitLocked';
+        let label = '暂不可招募';
+        if (state === GameState.Preparation) label = '转动命运';
+        else if (state === GameState.Roulette) label = '命运流转中…';
+        else if (state === GameState.Evolution) label = '选择转职方向';
+        else if (state === GameState.Placement) label = '完成布阵后继续';
+        else if (state === GameState.Battle) label = '战斗进行中';
+        const key = state + ':' + enabled + ':' + label;
+        if (key === this.lastButtonKey) return;
+        this.lastButtonKey = key;
+        this.recruitButtonLabel.string = label;
+        this.drawRecruitButton(enabled);
+    }
+
+    private sector(graphics: Graphics, index: number): void {
+        graphics.moveTo(0, 0);
+        for (let step = 0; step <= 40; step++) {
+            const angle = (90 + SECTOR_DEGREES / 2 - index * SECTOR_DEGREES - step / 40 * SECTOR_DEGREES) * Math.PI / 180;
+            graphics.lineTo(
+                Math.cos(angle) * BATTLE_LAYOUT.wheelRadius,
+                Math.sin(angle) * BATTLE_LAYOUT.wheelRadius,
+            );
         }
         graphics.close();
     }
-    update(dt: number): void {
-        this.clock+=dt;
-        const recruit=this.game.recruit, spinning=this.game.state===GameState.Roulette&&!recruit.revealing;
-        this.rotor.setRotationFromEuler(0,0,recruit.rotation);
-        const index=recruit.revealing&&recruit.plan?recruit.plan.index:-1;
-        if(index!==this.highlighted) {
-            this.highlighted=index;this.highlight.clear();
-            if(index>=0) {
-                this.sector(this.highlight,index);this.highlight.fillColor=this.ui.color('#F1C77A22');this.highlight.fill();
-                this.highlight.strokeColor=this.ui.color('#F4D497');this.highlight.lineWidth=5;this.highlight.stroke();
+
+    update(_dt: number): void {
+        this.sync();
+        const recruit = this.game.recruit;
+        const spinning = this.game.state === GameState.Roulette && !recruit.revealing;
+        this.rotor.setRotationFromEuler(0, 0, recruit.rotation);
+        const index = recruit.revealing && recruit.plan ? recruit.plan.index : -1;
+        if (index !== this.highlighted) {
+            this.highlighted = index;
+            this.highlight.clear();
+            if (index >= 0) {
+                this.sector(this.highlight, index);
+                this.highlight.fillColor = this.ui.color('#F1C77A33');
+                this.highlight.fill();
+                this.highlight.strokeColor = this.ui.color('#FFF0A5');
+                this.highlight.lineWidth = 6;
+                this.highlight.stroke();
             }
         }
-        const age=recruit.elapsed-RECRUIT_CONFIG.spinDuration;
-        const kick=index>=0&&age<.55?Math.sin(age/.55*Math.PI)*.07:0;
-        this.pointer.setScale(1+kick,1+kick,1);
-        const selected=BASES.find(base=>base.id===recruit.drawnBase);
-        this.result.string=spinning?'命运正在流转…':index>=0&&selected?`命运选择了你 · ${selected.name}`:'静候命运的召唤';
-        this.result.node.setScale(index>=0&&age<1?1+Math.sin(Math.max(0,age)*Math.PI)*.06:1,1,1);
-        this.detail.string=spinning?'指针停下之前，命运尚未揭晓':index>=0?'专属转职已开启 · 选择一个方向':'转动后直接抽取一位基础职业\n完成转职与布阵后可再次招募';
+        const age = recruit.elapsed - RECRUIT_CONFIG.spinDuration;
+        const kick = index >= 0 && age < 0.55 ? Math.sin(age / 0.55 * Math.PI) * 0.07 : 0;
+        this.pointer.setScale(1 + kick, 1 + kick, 1);
+        if (spinning) this.recruitButtonLabel.string = '命运流转中…';
     }
 }
