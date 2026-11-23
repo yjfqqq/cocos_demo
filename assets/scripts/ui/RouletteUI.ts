@@ -16,6 +16,7 @@ export class RouletteUI {
     private recruitButtonGraphics: Graphics;
     private recruitButtonLabel: Label;
     private lastButtonKey = '';
+    private highlighted = -1;
 
     constructor(
         parent: Node,
