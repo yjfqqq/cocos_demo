@@ -82,7 +82,7 @@ export class RouletteUI {
                 sectors.fillColor = ui.color(CLASS_PRESENTATION[base.id].light);
                 const x = Math.cos(angle) * radius;
                 const y = Math.sin(angle) * radius;
-                sectors.circle(x, y, radius === 184 ? 2.5 : 2,);
+                sectors.circle(x, y, radius === 184 ? 2.5 : 2);
                 sectors.fill();
             }
 
@@ -168,7 +168,7 @@ export class RouletteUI {
     }
 
     private drawTitle(): void {
-        const banner = this.ui.node(this.node, 'RouletteTitle', 0, 332, 450, 100);
+        const banner = this.ui.node(this.node, 'RouletteTitle', 0, 345, 450, 100);
         const graphics = banner.addComponent(Graphics);
         graphics.fillColor = this.ui.color('#32112F');
         graphics.roundRect(-180, -35, 360, 70, 14);

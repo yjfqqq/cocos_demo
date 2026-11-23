@@ -114,7 +114,27 @@ export class BattleUI extends Component {
 
     private buildHeader(): void {
         this.ui.panel(this.root, 'HeaderBase', 0, 480, 1880, 104, '#0D1028', '#9B7045', 238);
-        this.ui.button(this.root, 'Exit', '←', -850, 480, 132, 78, () => this.confirmExit(), true, true);
+        const exit = this.ui.node(this.root, 'Exit', -850, 480, 132, 78);
+        const exitGraphics = exit.addComponent(Graphics);
+        exitGraphics.fillColor = this.ui.color('#32152E');
+        exitGraphics.roundRect(-66, -39, 132, 78, 16);
+        exitGraphics.fill();
+        exitGraphics.lineWidth = 7;
+        exitGraphics.strokeColor = this.ui.color('#9A4B27');
+        exitGraphics.stroke();
+        exitGraphics.lineWidth = 3;
+        exitGraphics.strokeColor = this.ui.color('#FFE18A');
+        exitGraphics.roundRect(-58, -31, 116, 62, 12);
+        exitGraphics.stroke();
+        exitGraphics.strokeColor = this.ui.color('#FFF0B2');
+        exitGraphics.lineWidth = 8;
+        exitGraphics.moveTo(22, 0);
+        exitGraphics.lineTo(-20, 0);
+        exitGraphics.lineTo(-2, 18);
+        exitGraphics.moveTo(-20, 0);
+        exitGraphics.lineTo(-2, -18);
+        exitGraphics.stroke();
+        exit.on(Node.EventType.TOUCH_END, () => this.confirmExit());
 
         const coinCard = this.ui.panel(this.root, 'CoinCard', -585, 480, 310, 82, '#21172F', '#C38D4C', 245);
         const coin = this.ui.node(coinCard, 'CoinIcon', -112, 0, 42, 42);
@@ -214,7 +234,17 @@ export class BattleUI extends Component {
         previewGraphics.lineTo(16, 31);
         previewGraphics.close();
         previewGraphics.fill();
-        this.ui.text(preview, '☠', 0, 18, 39, '#4A1C2B', 64, 54);
+        previewGraphics.fillColor = this.ui.color('#E9C36D');
+        previewGraphics.circle(0, 22, 21);
+        previewGraphics.fill();
+        previewGraphics.rect(-16, -2, 32, 15);
+        previewGraphics.fill();
+        previewGraphics.fillColor = this.ui.color('#4A1C2B');
+        previewGraphics.circle(-8, 24, 4);
+        previewGraphics.circle(8, 24, 4);
+        previewGraphics.fill();
+        previewGraphics.rect(-7, -5, 14, 7);
+        previewGraphics.fill();
         this.ui.text(preview, '波次预览', 0, -34, 18, '#F6DDA5', 100, 28);
         preview.on(Node.EventType.TOUCH_END, () => this.showWavePreview());
     }
