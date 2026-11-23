@@ -4,7 +4,7 @@ import { BATTLE_LAYOUT, CLASS_PRESENTATION, RECRUIT_CONFIG } from '../config/Rec
 import { GameManager } from '../core/GameManager';
 import { GameState } from '../core/GameState';
 import { SECTOR_DEGREES } from '../recruit/RouletteSpin';
-import { DarkUI, PALETTE } from './DarkUI';
+import { DarkUI } from './DarkUI';
 import { classIcon } from './ClassIcon';
 
 export class RouletteUI {
