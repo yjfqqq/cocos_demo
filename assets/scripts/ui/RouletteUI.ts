@@ -12,6 +12,7 @@ export class RouletteUI {
     readonly rotor: Node;
     readonly pointer: Node;
     private highlight: Graphics;
+    private highlightEdges: Graphics;
     private recruitButton: Node;
     private recruitButtonGraphics: Graphics;
     private recruitButtonLabel: Label;
@@ -56,7 +57,8 @@ export class RouletteUI {
             this.drawFallbackRim(frame);
         }
 
-        this.highlight = ui.node(this.rotor, 'WinningSector').addComponent(Graphics);
+        this.highlight = ui.node(this.rotor, 'WinningSectorFill').addComponent(Graphics);
+        this.highlightEdges = ui.node(this.rotor, 'WinningSectorEdges').addComponent(Graphics);
 
         this.pointer = ui.node(frame, 'FixedPointer', 0, 239, 64, 70);
         const pointer = this.pointer.addComponent(Graphics);
@@ -335,8 +337,10 @@ export class RouletteUI {
      * Sector 0 is centred at 12 o'clock, matching RouletteSpin.ts.
      */
     private drawWinningHighlight(index: number): void {
-        const graphics = this.highlight;
-        graphics.clear();
+        const fill = this.highlight;
+        const edges = this.highlightEdges;
+        fill.clear();
+        edges.clear();
         if (index < 0) return;
 
         const centre = 90 - index * SECTOR_DEGREES;
@@ -347,41 +351,41 @@ export class RouletteUI {
         const inner = 72;
         const steps = 28;
 
-        // A soft ring-sector tint. Fill only: do not stroke the inner arc,
-        // otherwise it creates an unwanted curved border around the centre jewel.
-        graphics.moveTo(Math.cos(start) * inner, Math.sin(start) * inner);
-        graphics.lineTo(Math.cos(start) * outer, Math.sin(start) * outer);
+        // Soft ring-sector tint. It is rendered separately from the edge strokes,
+        // so no unwanted inner arc can appear around the centre jewel.
+        fill.moveTo(Math.cos(start) * inner, Math.sin(start) * inner);
+        fill.lineTo(Math.cos(start) * outer, Math.sin(start) * outer);
         for (let step = 1; step <= steps; step++) {
             const angle = start + (end - start) * step / steps;
-            graphics.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+            fill.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
         }
-        graphics.lineTo(Math.cos(end) * inner, Math.sin(end) * inner);
+        fill.lineTo(Math.cos(end) * inner, Math.sin(end) * inner);
         for (let step = 1; step <= steps; step++) {
             const angle = end + (start - end) * step / steps;
-            graphics.lineTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
+            fill.lineTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
         }
-        graphics.close();
-        graphics.fillColor = this.ui.color('#F6C65A2A');
-        graphics.fill();
+        fill.close();
+        fill.fillColor = this.ui.color('#F6C65A2A');
+        fill.fill();
 
-        // Re-emphasize the two existing dividers, starting outside the centre jewel.
-        graphics.strokeColor = this.ui.color('#FFE6A0C0');
-        graphics.lineWidth = 2.5;
-        graphics.moveTo(Math.cos(start) * inner, Math.sin(start) * inner);
-        graphics.lineTo(Math.cos(start) * outer, Math.sin(start) * outer);
-        graphics.moveTo(Math.cos(end) * inner, Math.sin(end) * inner);
-        graphics.lineTo(Math.cos(end) * outer, Math.sin(end) * outer);
-        graphics.stroke();
+        // Re-emphasize the two existing dividers, beginning outside the centre jewel.
+        edges.strokeColor = this.ui.color('#FFE6A0C0');
+        edges.lineWidth = 2.5;
+        edges.moveTo(Math.cos(start) * inner, Math.sin(start) * inner);
+        edges.lineTo(Math.cos(start) * outer, Math.sin(start) * outer);
+        edges.moveTo(Math.cos(end) * inner, Math.sin(end) * inner);
+        edges.lineTo(Math.cos(end) * outer, Math.sin(end) * outer);
+        edges.stroke();
 
         // The outer arc is the only continuous bright outline.
-        graphics.strokeColor = this.ui.color('#FFD36A');
-        graphics.lineWidth = 4;
-        graphics.moveTo(Math.cos(start) * outer, Math.sin(start) * outer);
+        edges.strokeColor = this.ui.color('#FFD36A');
+        edges.lineWidth = 4;
+        edges.moveTo(Math.cos(start) * outer, Math.sin(start) * outer);
         for (let step = 1; step <= steps; step++) {
             const angle = start + (end - start) * step / steps;
-            graphics.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+            edges.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
         }
-        graphics.stroke();
+        edges.stroke();
     }
 
     update(_dt: number): void {
