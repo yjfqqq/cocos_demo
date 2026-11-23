@@ -51,7 +51,7 @@ export class RouletteUI {
 
         // The decorative outer ring is a sibling of WheelRotor and therefore stays fixed.
         if (wheelRimArt) {
-            ui.image(frame, wheelRimArt, 'WheelRim', 0, 0, 432, 432);
+            ui.image(frame, wheelRimArt, 'WheelRim', 0, 0, 440, 440);
         } else {
             this.drawFallbackRim(frame);
         }
@@ -96,25 +96,25 @@ export class RouletteUI {
     private drawFallbackRim(frame: Node): void {
         const rim = frame.addComponent(Graphics);
         rim.fillColor = this.ui.color('#100B24');
-        rim.circle(0, 0, 246);
+        rim.circle(0, 0, 220);
         rim.fill();
         rim.lineWidth = 9;
         rim.strokeColor = this.ui.color('#6D3A24');
-        rim.circle(0, 0, 246);
+        rim.circle(0, 0, 220);
         rim.stroke();
         rim.lineWidth = 5;
         rim.strokeColor = this.ui.color('#F2B94F');
-        rim.circle(0, 0, 238);
+        rim.circle(0, 0, 214);
         rim.stroke();
         rim.lineWidth = 2;
         rim.strokeColor = this.ui.color('#FFF0A6');
-        rim.circle(0, 0, 229);
+        rim.circle(0, 0, 206);
         rim.stroke();
         for (let i = 0; i < 56; i++) {
             const angle = i / 56 * Math.PI * 2;
-            const outer = i % 8 === 0 ? 216 : 222;
+            const outer = i % 8 === 0 ? 192 : 198;
             rim.moveTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
-            rim.lineTo(Math.cos(angle) * 230, Math.sin(angle) * 230);
+            rim.lineTo(Math.cos(angle) * 206, Math.sin(angle) * 206);
         }
         rim.stroke();
 
@@ -334,7 +334,9 @@ export class RouletteUI {
         const recruit = this.game.recruit;
         const spinning = this.game.state === GameState.Roulette && !recruit.revealing;
         this.rotor.setRotationFromEuler(0, 0, recruit.rotation);
-        const index = recruit.revealing && recruit.plan ? recruit.plan.index : -1;
+        // Keep the wheel neutral by default; reveal the winning sector only after rotation stops.
+        const revealComplete = recruit.plan !== null && recruit.revealing;
+        const index = revealComplete ? recruit.plan!.index : -1;
         if (index !== this.highlighted) {
             this.highlighted = index;
             this.highlight.clear();
