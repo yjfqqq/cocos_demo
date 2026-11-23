@@ -22,7 +22,8 @@ export class RouletteUI {
         parent: Node,
         private ui: DarkUI,
         private game: GameManager,
-        wheelArt: SpriteFrame | null,
+        wheelRotorArt: SpriteFrame | null,
+        wheelRimArt: SpriteFrame | null,
         private onRecruit: () => void,
         private onMessage: (message: string) => void,
     ) {
@@ -40,12 +41,21 @@ export class RouletteUI {
         this.drawTitle();
 
         const frame = ui.node(this.node, 'WheelFrame', 0, BATTLE_LAYOUT.wheelY, 500, 500);
+        // Only the inner plate is attached to WheelRotor, so it can spin independently.
         this.rotor = ui.node(frame, 'WheelRotor', 0, 0, 432, 432);
-        if (wheelArt) {
-            ui.image(this.rotor, wheelArt, 'WheelArtwork', 0, 0, 432, 432);
+        if (wheelRotorArt) {
+            ui.image(this.rotor, wheelRotorArt, 'WheelArtwork', 0, 0, 432, 432);
         } else {
-            this.drawFallbackWheel(frame);
+            this.drawFallbackRotor();
         }
+
+        // The decorative outer ring is a sibling of WheelRotor and therefore stays fixed.
+        if (wheelRimArt) {
+            ui.image(frame, wheelRimArt, 'WheelRim', 0, 0, 432, 432);
+        } else {
+            this.drawFallbackRim(frame);
+        }
+
         this.highlight = ui.node(this.rotor, 'WinningSector').addComponent(Graphics);
 
         this.pointer = ui.node(frame, 'FixedPointer', 0, 239, 64, 70);
@@ -83,7 +93,7 @@ export class RouletteUI {
         this.sync();
     }
 
-    private drawFallbackWheel(frame: Node): void {
+    private drawFallbackRim(frame: Node): void {
         const rim = frame.addComponent(Graphics);
         rim.fillColor = this.ui.color('#100B24');
         rim.circle(0, 0, 246);
@@ -108,6 +118,9 @@ export class RouletteUI {
         }
         rim.stroke();
 
+    }
+
+    private drawFallbackRotor(): void {
         const sectors = this.rotor.addComponent(Graphics);
         BASES.forEach((base, index) => {
             this.sector(sectors, index);
@@ -144,7 +157,7 @@ export class RouletteUI {
             icon.setPosition(0, 0);
         });
 
-        const centre = this.ui.node(frame, 'ArcaneHub', 0, 0, 140, 140);
+        const centre = this.ui.node(this.rotor, 'ArcaneHub', 0, 0, 140, 140);
         const hub = centre.addComponent(Graphics);
         hub.fillColor = this.ui.color('#241039');
         hub.circle(0, 0, 68);
@@ -174,7 +187,6 @@ export class RouletteUI {
         hub.lineTo(-16, 0);
         hub.close();
         hub.fill();
-
     }
 
     private drawTitle(): void {
