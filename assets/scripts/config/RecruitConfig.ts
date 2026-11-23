@@ -19,7 +19,7 @@ export const CLASS_PRESENTATION: Record<BaseClass, ClassPresentation> = {
  * for that transform while their model coordinates remain unchanged.
  */
 export const BATTLE_LAYOUT = {
-    fieldX: 325,
+    fieldX: 322.5,
     fieldScaleX: 0.75,
     fieldScaleY: 1.25,
     fieldWidth: 1700,
