@@ -54,10 +54,11 @@ export class BattleUI extends Component {
             resolve(error ? null : asset as unknown as T);
         }));
 
-        const [font, background, battlefield, ...frames] = await Promise.all([
+        const [font, background, battlefield, wheelArt, ...frames] = await Promise.all([
             load<Font>('fonts/fusion-pixel-12px-proportional-zh_hans', Font),
             load<SpriteFrame>('backgrounds/castle_background_1920x1080/spriteFrame', SpriteFrame),
             load<SpriteFrame>('ui/chapter/previews/chapter_01_border_watch/spriteFrame', SpriteFrame),
+            load<SpriteFrame>('ui/icons/fate_wheel/spriteFrame', SpriteFrame),
             ...Array.from({ length: 8 }, (_, i) => load<SpriteFrame>('characters/guard/frames/guard_cape_idle_0' + (i + 1) + '/spriteFrame', SpriteFrame)),
         ]);
         if (!isValid(this.node)) return;
@@ -91,6 +92,7 @@ export class BattleUI extends Component {
             this.root,
             this.ui,
             this.game,
+            wheelArt as SpriteFrame | null,
             () => {
                 if (!this.game.spin()) this.hint.string = this.game.recruit.error || '金币不足，无法转动命运';
             },
