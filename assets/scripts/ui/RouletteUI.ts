@@ -139,7 +139,7 @@ export class RouletteUI {
                 92,
                 92,
             );
-            const icon = classIcon(iconRoot, ui, base.id, 70);
+            const icon = classIcon(iconRoot, this.ui, base.id, 70);
             icon.setPosition(0, 0);
         });
 
